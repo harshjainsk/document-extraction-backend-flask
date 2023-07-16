@@ -5,6 +5,7 @@ import requests
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///uploadedImages.db'
 
 
 # INITIALIZE THE DATABASE
@@ -19,6 +20,14 @@ class User(db.Model):
     date_created = db.Column(db.DateTime, default = datetime.utcnow)
     email = db.Column(db.String, unique = True, nullable = False)
     password = db.Column(db.String, nullable = False)
+
+
+class AddImage(db.Model):
+
+    id = db.Column(db.Integer, primary_key = True)
+    filename = db.Column(db.String)
+    data = db.Column(db.LargeBinary)
+    
 
 @app.route("/")
 def test():
@@ -52,6 +61,23 @@ def user():
         }
 
     return "Login page"
+
+
+@app.route("/uploadImage", methods = ["GET", "POST"])
+def uploadImage():
+
+    if request.method == 'POST':
+        file = request.files['file']
+
+        new_file_upload = AddImage(filename = file.filename, data = file.read())
+        db.session.add(new_file_upload)
+        db.session.commit()
+        list_of_images = AddImage.query.all()
+        print(list_of_images)
+        for i in list_of_images:
+            print(i.filename)
+        return {"Uploaded" : f"{file.filename}"}
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
