@@ -1,12 +1,14 @@
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-import requests
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///uploadedImages.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///document-extraction.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# create an instance of bcrypt
+bcrypt = Bcrypt(app)
 
 # INITIALIZE THE DATABASE
 db = SQLAlchemy(app)
@@ -42,8 +44,10 @@ def user():
         user_email = request.form['email']
         user_password = request.form['password']
 
+        encrypted_password = bcrypt.generate_password_hash(user_password)
+
         # adding user to the database
-        new_user = User(name=user_name, email = user_email, password = user_password)
+        new_user = User(name=user_name, email = user_email, password = encrypted_password)
 
         # push/ commit to the database
         try:
@@ -52,12 +56,12 @@ def user():
 
         except Exception as e:
             print(e)
-            return {"error" : "Please state the error, I also dont know"}
+            return {"error" : f"{e}"}
         
         return {
-            "retrieved_email" : user_email,
-            "retrieved_password" : user_password,
-            "retrieved_name" : user_name
+            "retrieved_email" : str(user_email),
+            "retrieved_password" : str(user_password),
+            "retrieved_name" : str(user_name)
         }
 
     return "Login page"
@@ -73,7 +77,7 @@ def uploadImage():
         db.session.add(new_file_upload)
         db.session.commit()
         list_of_images = AddImage.query.all()
-        print(list_of_images)
+        # print(list_of_images)
         for i in list_of_images:
             print(i.filename)
         return {"Uploaded" : f"{file.filename}"}
