@@ -64,8 +64,6 @@ def extract_details_from_aadhar(text):
         if 'DOB' in i:
             date = i
     
-
-
     # extract gender
 
     if 'Male' in text:
@@ -99,37 +97,3 @@ def extract_details_from_aadhar(text):
     }
 
 
-def give_detection_results(image):
-    image = cv2.resize(image, (640, 640))
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    results = model(image)
-    print(results)
-    # return results
-    print(results)
-    bbox = results.xyxy[0][0]
-    cropped_image = get_cropped_image(image, bbox)
-    detected_class = int(results.xyxy[0][0][-1])
-    detected_class = names[detected_class]
-    cropped_image = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB)
-    result = ocr.ocr(cropped_image, cls=True)
-    extraction = ""
-    for idx in range(len(result)):
-        res = result[idx]
-        for line in res:
-            extraction += line[-1][0]
-            extraction += ' '
-    print(extraction)
-
-    if detected_class == 'aadhar card':
-        info = extract_details_from_aadhar(extraction)
-    elif detected_class == 'driving license':
-        info = extract_details_from_aadhar(extraction)
-    elif detected_class == 'pan card':
-        return extraction
-    elif detected_class == 'salary slip':
-        info = extract_details_from_aadhar(extraction)
-    else:
-        info = extract_details_from_aadhar(extraction)
-
-
-    return info

@@ -135,19 +135,36 @@ def uploadImage():
 
 @app.route('/extract_details', methods = ['GET',"POST"])
 def extract_details():
+
+    info_of_multiple_files = {}
+    
     if request.method == 'POST':
-        file = request.files['file']
+        
+        if 'files[]' not in request.files:
+            return {"Error" : "No file part"}
+        
+        files = request.files.getlist('files[]')
+        print(files)
 
-        if allowed_file(file.filename):
 
-            image = Image.open(file)
-            image_array = np.array(image)
+        for file in files:
 
-            info = give_detection_results(image_array)
-            print(info)
-            return {
-                "info_extracted" : info
-            }
+            if file.filename == '':
+                return {"error" : "No selected file'"}
+            
+
+            if allowed_file(file.filename):
+
+                image = Image.open(file)
+                image_array = np.array(image)
+
+                info = give_detection_results(image_array)
+                print(info)
+
+                temp_dict_to_append = {file.filename : info}
+                info_of_multiple_files.update(temp_dict_to_append)
+
+    return info_of_multiple_files
 
 
             # new_file_upload = AddImage(filename = file.filename, data = file.read())
