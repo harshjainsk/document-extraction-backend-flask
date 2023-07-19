@@ -19,17 +19,6 @@ def get_cropped_image(image, bounding_box):
     return cropped_image
 
 
-def get_cropped_image(image, bounding_box):
-    x1 = np.int32(bounding_box[0])
-    y1 = np.int32(bounding_box[1])
-    x2 = np.int32(bounding_box[2])
-    y2 = np.int32(bounding_box[3])
-    
-    cropped_image = image[y1:y2, x1:x2]
-    cropped_image = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB)
-    return cropped_image
-
-
 def extract_details_from_aadhar(text):
     text_list = text.split(" ")
     try:
@@ -98,3 +87,56 @@ def extract_details_from_aadhar(text):
     }
 
 
+def extract_details_from_pan_except_name(text):
+    text_list = text.split(" ")
+
+    extra_words = ["INCOME", "TAX", "DEPARTMENT", "INCOMETAX", "GOVT.OFINDIA", "Permanent", "Account", "Number", 
+                "Signature", "GOVTOF", "INDIA", "GOVT.", "GOVT", "OF"]
+
+    for word_to_pop in extra_words:
+
+        try:
+            text_list.pop(text_list.index(word_to_pop.upper()))
+
+
+        except Exception as e:
+            print(e)
+
+
+    text = " ".join(text_list)
+    print(text)
+
+
+    # date
+    date_regex = r"\b(\d{2}/\d{2}/\d{4})\b"
+    date = "Not detected"
+    matches = re.findall(date_regex, text)
+    if matches:
+        date = matches[0]
+        print(date)
+    else:
+        print("No date found.")
+
+
+    # # # pan number extraction
+    pan_number = "Not detected"
+    pan_number_regex = r"\b([A-Z0-9]{10})\b"
+
+    matches = re.findall(pan_number_regex, text)
+    print(matches)
+
+    for match in matches:
+        
+        if match.isalpha() == False and match.isalnum() == True:
+            pan_number = match
+
+    print("Date of Birth:", date)
+    print("Permanent Account Number:", pan_number)
+
+    return {
+        "predicted_class" : "pan card",
+        # "name" : name,
+        "dob" : date,
+        # "father's name" : father_name,
+        "pan_number" : pan_number
+    }

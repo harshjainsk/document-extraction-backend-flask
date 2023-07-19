@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_bcrypt import Bcrypt
 
-from model_utils import allowed_file, extract_details_from_aadhar, get_cropped_image
+from model_utils import allowed_file, extract_details_from_aadhar, get_cropped_image, extract_details_from_pan_except_name
 
 import numpy as np
 from PIL import Image
@@ -13,7 +13,7 @@ from matplotlib import pyplot as plt
 from paddleocr import PaddleOCR,draw_ocr
 
 
-model = torch.hub.load('ultralytics/yolov5', 'custom', path = '150-epochs-best.pt', force_reload = True)
+model = torch.hub.load('ultralytics/yolov5', 'custom', path = 'model-weights/150-epochs-best.pt', force_reload = True)
 ocr = PaddleOCR(use_angle_cls=True, lang='en') # need to run only once to download and load model into memory
 names = ['aadhar card', 'driving license', 'pan card', 'salary slip', 'voter id']
 
@@ -44,7 +44,7 @@ def give_detection_results(image):
     elif detected_class == 'driving license':
         info = extract_details_from_aadhar(extraction)
     elif detected_class == 'pan card':
-        return extraction
+        info = extract_details_from_pan_except_name(extraction)
     elif detected_class == 'salary slip':
         info = extract_details_from_aadhar(extraction)
     else:
@@ -176,7 +176,7 @@ def extract_details():
             #     print(i.filename)
             # return {"Uploaded" : f"{file.filename}"}
 
-    
+
 
 if __name__ == "__main__":
     with app.app_context():
