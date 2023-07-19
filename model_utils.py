@@ -90,6 +90,7 @@ def extract_details_from_aadhar(text):
     print("Aadhar Number:", aadhar_number)
     
     return {
+        "predicted_class" : "aadhaar card",
         "name" : name,
         "dob" : date,
         "gender" : gender,
