@@ -4,11 +4,19 @@ import re
 
 
 def allowed_file(filename):
+    """
+        checks if a file is of the following type
+    """
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 
 def get_cropped_image(image, bounding_box):
+    """
+        fetches the cropped part of image where a particular
+        document is predicted to be according to the bounding
+        box coordinates
+    """
     x1 = np.int32(bounding_box[0])
     y1 = np.int32(bounding_box[1])
     x2 = np.int32(bounding_box[2])
@@ -19,7 +27,29 @@ def get_cropped_image(image, bounding_box):
     return cropped_image
 
 
+def preprocess_image(img):
+    gray = cv2.cvtColor(np.array(img),cv2.COLOR_BGR2GRAY)
+    resized = cv2.resize(gray,None, fx = 1.5,fy = 1.5,interpolation = cv2.INTER_LINEAR)
+    
+    
+    
+    processed_image = cv2.adaptiveThreshold(
+        resized,
+        255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY,
+        31,
+        11
+    )
+    
+    return processed_image
+
+
 def extract_details_from_aadhar(text):
+    """
+        extracts aadhaar details from the text which is
+        extracted from image using paddle OCR
+    """
     text_list = text.split(" ")
     try:
         text_list.pop(text_list.index("Government"))
@@ -88,6 +118,10 @@ def extract_details_from_aadhar(text):
 
 
 def extract_details_from_pan_except_name(text):
+    """
+        extracts pan details from the text which is
+        extracted from image using paddle OCR
+    """
     text_list = text.split(" ")
 
     extra_words = ["INCOME", "TAX", "DEPARTMENT", "INCOMETAX", "GOVT.OFINDIA", "Permanent", "Account", "Number", 
@@ -140,3 +174,19 @@ def extract_details_from_pan_except_name(text):
         # "father's name" : father_name,
         "pan_number" : pan_number
     }
+
+
+def extract_name_from_pancard_preprocessing(cropped_image):
+    cropped_image = preprocess_image(cropped_image)
+    print(cropped_image.shape)
+
+    # get cropped name part
+    height = cropped_image.shape[0]
+    width = cropped_image.shape[1]
+
+    name_part_of_image = cropped_image[int(height*0.50) : int(height*0.80), 0:int(width/2)]
+
+    return name_part_of_image
+
+def extract_name_from_pancard(text):
+    pass

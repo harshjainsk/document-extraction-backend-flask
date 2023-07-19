@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_bcrypt import Bcrypt
 
-from model_utils import allowed_file, extract_details_from_aadhar, get_cropped_image, extract_details_from_pan_except_name
+from model_utils import allowed_file, extract_details_from_aadhar, get_cropped_image, extract_details_from_pan_except_name, extract_name_from_pancard_preprocessing
 
 import numpy as np
 from PIL import Image
@@ -23,13 +23,24 @@ def give_detection_results(image):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     results = model(image)
     print(results)
-    # return results
-    print(results)
+
     bbox = results.xyxy[0][0]
     cropped_image = get_cropped_image(image, bbox)
     detected_class = int(results.xyxy[0][0][-1])
     detected_class = names[detected_class]
     cropped_image = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB)
+
+    # if detected_class == 'pan card':
+    #     name_cropped_image = extract_name_from_pancard_preprocessing(cropped_image)
+    #     result = ocr.ocr(name_cropped_image, cls=True)
+    #     extraction = ""
+    #     for idx in range(len(result)):
+    #         res = result[idx]
+    #         for line in res:
+    #             extraction += line[-1][0]
+    #             extraction += ' '
+    #     print("name from pancard", extraction)
+
     result = ocr.ocr(cropped_image, cls=True)
     extraction = ""
     for idx in range(len(result)):
@@ -37,7 +48,7 @@ def give_detection_results(image):
         for line in res:
             extraction += line[-1][0]
             extraction += ' '
-    print(extraction)
+        print(extraction)
 
     if detected_class == 'aadhar card':
         info = extract_details_from_aadhar(extraction)

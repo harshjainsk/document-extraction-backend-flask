@@ -30,7 +30,7 @@ ocr = PaddleOCR(use_angle_cls=True, lang='en') # need to run only once to downlo
 names = ['aadhar card', 'driving license', 'pan card', 'salary slip', 'voter id']
 
 
-image = cv2.imread("testing-images/34e5631dcea311bf2ca2764333a78551.jpg")
+image = cv2.imread("testing-images/9b5ee2dd759ebd6ab10442c3bac0b823.jpg")
 image = cv2.resize(image, (640, 640))
 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 results = model(image)
@@ -42,8 +42,7 @@ cropped_image = get_cropped_image(image, bbox)
 
 print(cropped_image.shape)
 
-# width = abs(np.int32(bbox[1]) - np.int32(bbox[3]))
-# height = abs(np.int32(bbox[0]) - np.int32(bbox[2]))
+
 cv2.imshow("cropped_image", cropped_image)
 
 
