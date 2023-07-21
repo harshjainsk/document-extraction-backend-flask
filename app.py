@@ -10,7 +10,9 @@ from PIL import Image
 import cv2
 import torch
 from matplotlib import pyplot as plt
-from paddleocr import PaddleOCR,draw_ocr
+from paddleocr import PaddleOCR
+import base64
+import io
 
 
 model = torch.hub.load('ultralytics/yolov5', 'custom', path = 'model-weights/150-epochs-best.pt', force_reload = True)
@@ -190,7 +192,15 @@ def extract_details():
                 info = give_detection_results(image_array)
                 print(info)
 
-                temp_dict_to_append = {file.filename : info}
+                # temp_dict_to_append = {file.filename : info}
+                # info_of_multiple_files.update(temp_dict_to_append)
+
+                # Convert the image to Base64 format
+                buffered = io.BytesIO()
+                image.save(buffered, format="JPEG")  # You can use the appropriate format (JPEG, PNG, etc.)
+                encoded_image = base64.b64encode(buffered.getvalue()).decode("utf-8")
+
+                temp_dict_to_append = {file.filename: {"info": info, "image": encoded_image}}
                 info_of_multiple_files.update(temp_dict_to_append)
 
     return info_of_multiple_files
