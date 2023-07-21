@@ -169,9 +169,9 @@ def extract_details_from_pan_except_name(text):
 
     return {
         "predicted_class" : "pan card",
-        # "name" : name,
+        "name" : "Not detected",
         "dob" : date,
-        # "father's name" : father_name,
+        "father_name" : "Not detected",
         "pan_number" : pan_number
     }
 
@@ -188,5 +188,38 @@ def extract_name_from_pancard_preprocessing(cropped_image):
 
     return name_part_of_image
 
-def extract_name_from_pancard(text):
-    pass
+def extract_name_part_from_pancard(cropped_image):
+    cropped_image = preprocess_image(cropped_image)
+    print(cropped_image.shape)
+
+    # get cropped name part
+    height = cropped_image.shape[0]
+    width = cropped_image.shape[1]
+
+    name_part_of_image = cropped_image[int(height*0.50) : int(height*0.80), 0:int(width*0.70)]
+
+    return name_part_of_image
+    # cv2.imshow("name part", name_part_of_image)
+    # cv2.imshow("cropped_image", cropped_image)
+
+
+
+
+    # name_cropped_image = extract_name_from_pancard_preprocessing(cropped_image)
+
+
+
+    # result = ocr.ocr(name_part_of_image, cls=True)
+    # name_list_ocr_extracted = []
+    # for idx in range(len(result)):
+    #     res = result[idx]
+    #     for line in res:
+    #         name_list_ocr_extracted.append(line[-1][0])
+
+    # print(name_list_ocr_extracted)
+    # name = name_list_ocr_extracted[1]
+    # father_name = name_list_ocr_extracted[-1]
+    # print("name from pancard", extraction)
+
+
+    # return name, father_name

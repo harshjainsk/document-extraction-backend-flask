@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_bcrypt import Bcrypt
 
-from model_utils import allowed_file, extract_details_from_aadhar, get_cropped_image, extract_details_from_pan_except_name, extract_name_from_pancard_preprocessing
+from model_utils import allowed_file, extract_details_from_aadhar, get_cropped_image, extract_details_from_pan_except_name, extract_name_part_from_pancard
 
 import numpy as np
 from PIL import Image
@@ -20,7 +20,7 @@ names = ['aadhar card', 'driving license', 'pan card', 'salary slip', 'voter id'
 
 def give_detection_results(image):
     image = cv2.resize(image, (640, 640))
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     results = model(image)
     print(results)
 
@@ -53,11 +53,29 @@ def give_detection_results(image):
     if detected_class == 'aadhar card':
         info = extract_details_from_aadhar(extraction)
     elif detected_class == 'driving license':
-        info = extract_details_from_aadhar(extraction)
+        # info = extract_details_from_aadhar(extraction)
+        return {"predicted_class":"driving_license"}
     elif detected_class == 'pan card':
         info = extract_details_from_pan_except_name(extraction)
+        name_part_of_image = extract_name_part_from_pancard(cropped_image=cropped_image)
+        cv2.imshow("cccc", name_part_of_image)
+        result = ocr.ocr(name_part_of_image, cls=True)
+        name_list_ocr_extracted = []
+        for idx in range(len(result)):
+            res = result[idx]
+            for line in res:
+                name_list_ocr_extracted.append(line[-1][0])
+
+        print(name_list_ocr_extracted)
+        try:
+            info['name'] = name_list_ocr_extracted[1]
+            info['father_name'] = name_list_ocr_extracted[-1]
+        except Exception as e:
+            print(e)
+        # info = extract_name_from_pancard(cropped_image=cropped_image, info)
     elif detected_class == 'salary slip':
-        info = extract_details_from_aadhar(extraction)
+        # info = extract_details_from_aadhar(extraction)
+        return {"predicted_class":"salary_slip"}
     else:
         info = extract_details_from_aadhar(extraction)
 
