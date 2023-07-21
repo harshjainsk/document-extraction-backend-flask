@@ -40,16 +40,18 @@ def preprocess_image(img):
 
     return processed_image
     
-    return processed_image
 
 model = torch.hub.load('ultralytics/yolov5', 'custom', path = 'model-weights/150-epochs-best.pt', force_reload = True)
 ocr = PaddleOCR(use_angle_cls=True, lang='en') # need to run only once to download and load model into memory
 names = ['aadhar card', 'driving license', 'pan card', 'salary slip', 'voter id']
 
 
-image = cv2.imread("testing-images/a2f1f2834472ef1c93d076de916f6ee9.jpg")
+image = cv2.imread("testing-images/baa5ab4b-952b-43fd-b91e-19664c6c5e6a.jpeg")
 image = cv2.resize(image, (640, 640))
-image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+cv2.imshow("image bgr", image)
+cv2.waitKey(0)
+# image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+cv2.imshow("image rgb", image)
 results = model(image)
 print(results)
 
@@ -83,13 +85,17 @@ cv2.imshow("cropped_image", cropped_image)
 
 result = ocr.ocr(name_part_of_image, cls=True)
 extraction = ""
+name_list_ocr_extracted = []
 for idx in range(len(result)):
     res = result[idx]
     for line in res:
-        print(line[-1][0])
+        name_list_ocr_extracted.append(line[-1][0])
         extraction += line[-1][0]
         extraction += ' '
 
+print(name_list_ocr_extracted)
+name = name_list_ocr_extracted[1]
+father_name = name_list_ocr_extracted[-1]
 print("name from pancard", extraction)
 
 
